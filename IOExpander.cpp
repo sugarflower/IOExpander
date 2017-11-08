@@ -2,7 +2,6 @@
 
 void IOExpander::begin(){
 	Wire.begin();
-	Serial.begin(9600);
 }
 
 void IOExpander::setDeviceAddress(uint8_t addr){
@@ -36,7 +35,6 @@ void IOExpander::beginSPI(){
 	IOExpander::pinMode(SCK,OUTPUT);
 	IOExpander::pinMode(SI,OUTPUT);
 	IOExpander::pinMode(SO,INPUT);
-	IOExpander::digitalWrite(SO,LOW); //test
 }
 void IOExpander::setSPIAddress(uint8_t addr){
 	IOExpander::spi_addr=addr;
@@ -73,7 +71,6 @@ uint8_t IOExpander::readSPI(uint16_t addr){
 	for(int i1=0; i1<8; i1++){
 		IOExpander::digitalWrite(IOExpander::SCK,LOW);
 		ret |= IOExpander::digitalRead(IOExpander::SO)<<(7-i1);
-		Serial.println(IOExpander::digitalRead(IOExpander::SO));
 		IOExpander::digitalWrite(IOExpander::SCK,HIGH);
 	}
 	IOExpander::digitalWrite(IOExpander::CS,HIGH);
