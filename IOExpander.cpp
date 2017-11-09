@@ -22,16 +22,12 @@ uint8_t IOExpander::digitalRead(uint8_t pin){
 	return (readByte()>>pin) & 1;
 }
 
-/*
-Currently the software SPI instruction does not work well with PCF 8574.
-The circuit may need to be devised, and there may be a bug in this software SPI instruction. :(
-*/
 void IOExpander::beginSPI(){
-	IOExpander::CS =3;
+	//IOExpander::CS =3;
 	IOExpander::SCK=2;
 	IOExpander::SI =1;
 	IOExpander::SO =0;
-	IOExpander::pinMode(CS,OUTPUT);
+	//IOExpander::pinMode(CS,OUTPUT);
 	IOExpander::pinMode(SCK,OUTPUT);
 	IOExpander::pinMode(SI,OUTPUT);
 	IOExpander::pinMode(SO,INPUT);
@@ -39,6 +35,24 @@ void IOExpander::beginSPI(){
 void IOExpander::setSPIAddress(uint8_t addr){
 	IOExpander::spi_addr=addr;
 }
+void IOExpander::spiWriteByte(uint8_t value){
+	for(int i=0; i<8; i++){
+		IOExpander::digitalWrite(IOExpander::SCK,LOW);
+		IOExpander::digitalWrite(IOExpander::SI,(value&(0x80>>i))!=0 ? HIGH : LOW );
+		IOExpander::digitalWrite(IOExpander::SCK,HIGH);
+	}
+}
+uint8_t IOExpander::spiReadByte(){
+	uint8_t ret=0;
+	for(int i=0; i<8; i++){
+		IOExpander::digitalWrite(IOExpander::SCK,LOW);
+		ret |= IOExpander::digitalRead(IOExpander::SO)<<(7-i);
+		IOExpander::digitalWrite(IOExpander::SCK,HIGH);
+	}
+	IOExpander::digitalWrite(IOExpander::CS,HIGH);
+	return ret;
+}
+/*
 void IOExpander::writeSPI(uint16_t addr,uint8_t value){
 	IOExpander::spiBuf[0]=IOExpander::spi_addr;
 	IOExpander::spiBuf[1]=addr >> 8;
@@ -76,6 +90,7 @@ uint8_t IOExpander::readSPI(uint16_t addr){
 	IOExpander::digitalWrite(IOExpander::CS,HIGH);
 	return ret;
 }
+*/
 
 #ifdef __IOE_PCF8574__
 uint8_t IOExpander::readByte(){

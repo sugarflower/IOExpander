@@ -16,8 +16,10 @@ public:
 	void setSPIAddress(uint8_t addr);
 	void digitalWrite(uint8_t pin,uint8_t value);
 	uint8_t digitalRead(uint8_t pin);
-	void writeSPI(uint16_t addr,uint8_t value);
-	uint8_t readSPI(uint16_t addr);
+	//void writeSPI(uint16_t addr,uint8_t value);
+	//uint8_t readSPI(uint16_t addr);
+	void spiWriteByte(uint8_t value);
+	uint8_t spiReadByte();
 	void writeByte(uint8_t data);
 	uint8_t readByte();
 	void pinMode(uint8_t pin,uint8_t mode);
