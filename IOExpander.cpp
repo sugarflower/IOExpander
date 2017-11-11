@@ -44,20 +44,23 @@ void IOExpander::pinMode(uint8_t pin, uint8_t mode){}
 #ifdef __IOE_MCP23017__
 uint16_t IOExpander::readByte(){
 	IOExpander::buf = 0;
+
 	Wire.beginTransmission(device_addr);
 	Wire.write(0x13);
 	Wire.endTransmission();
 	Wire.requestFrom(device_addr,1);
-	if( Wire.available() ){
-		IOExpander::buf |= Wire.read();
+	while( Wire.available() ){
+		IOExpander::buf = Wire.read();
 	}
+
 	IOExpander::buf = IOExpander::buf << 8;
+
 	Wire.beginTransmission(device_addr);
 	Wire.write(0x12);
 	Wire.endTransmission();
 	Wire.requestFrom(device_addr,1);
-	if( Wire.available() ){
-		IOExpander::buf |= Wire.read();
+	while( Wire.available() ){
+		IOExpander::buf = (IOExpander::buf & 0xff00) | Wire.read();
 	}
 	return IOExpander::buf;
 }
@@ -81,13 +84,15 @@ void IOExpander::pinMode(uint8_t pin, uint8_t mode){
 	} else {
 		port=0;
 	}
+
 	Wire.beginTransmission(device_addr);
 	Wire.write(port);
 	Wire.endTransmission();
 	Wire.requestFrom(device_addr,1);
-	while( !Wire.available() ){
+	while( Wire.available() ){
 		IOExpander::buf=Wire.read();
 	}
+
 	if(mode==OUTPUT){
 		IOExpander::buf &= ~( 1 << pin ); // reset bit
 	} else {
@@ -97,7 +102,7 @@ void IOExpander::pinMode(uint8_t pin, uint8_t mode){
 	switch(mode){
 		case INPUT:
 		case OUTPUT:
-			Wire.write(0x00 + port);
+			Wire.write(port);
 			Wire.write(IOExpander::buf);
 			Wire.endTransmission();
 
@@ -105,16 +110,17 @@ void IOExpander::pinMode(uint8_t pin, uint8_t mode){
 			Wire.write(0x0c + port);
 			Wire.endTransmission();
 			Wire.requestFrom(device_addr,1);
-			while( !Wire.available() ){
+			while( Wire.available() ){
 				IOExpander::buf=Wire.read();
 			}
 			IOExpander::buf &= ~( 1 << pin ); // reset bit
 			Wire.beginTransmission(device_addr);
 			Wire.write(0x0c + port);
 			Wire.write(IOExpander::buf);
+
 			break;
 		case INPUT_PULLUP:
-			Wire.write(0x00 + port);
+			Wire.write(port);
 			Wire.write(IOExpander::buf);
 			Wire.endTransmission();
 
@@ -122,7 +128,7 @@ void IOExpander::pinMode(uint8_t pin, uint8_t mode){
 			Wire.write(0x0c + port);
 			Wire.endTransmission();
 			Wire.requestFrom(device_addr,1);
-			while( !Wire.available() ){
+			while( Wire.available() ){
 				IOExpander::buf=Wire.read();
 			}
 			IOExpander::buf |= ( 1 << pin ); // set bit
@@ -142,18 +148,16 @@ void IOExpander::beginSPI(){
 	IOExpander::SCK=2;
 	IOExpander::SI =1;
 	IOExpander::SO =0;
-	IOExpander::pinMode(SCK,OUTPUT);
-	IOExpander::pinMode(SI,OUTPUT);
-	IOExpander::pinMode(SO,INPUT);
+	IOExpander::pinMode(IOExpander::SCK,OUTPUT);
+	IOExpander::pinMode(IOExpander::SI,OUTPUT);
+	IOExpander::pinMode(IOExpander::SO,INPUT);
 }
-void IOExpander::setSPIAddress(uint8_t addr){
-	IOExpander::spi_addr=addr;
-}
+
 void IOExpander::spiWriteByte(uint8_t value){
 	for(int i=0; i<8; i++){
-		IOExpander::digitalWrite(IOExpander::SCK,LOW);
 		IOExpander::digitalWrite(IOExpander::SI,(value&(0x80>>i))!=0 ? HIGH : LOW );
 		IOExpander::digitalWrite(IOExpander::SCK,HIGH);
+		IOExpander::digitalWrite(IOExpander::SCK,LOW);
 	}
 }
 uint8_t IOExpander::spiReadByte(){
@@ -163,16 +167,6 @@ uint8_t IOExpander::spiReadByte(){
 		ret |= IOExpander::digitalRead(IOExpander::SO)<<(7-i);
 		IOExpander::digitalWrite(IOExpander::SCK,HIGH);
 	}
-	IOExpander::digitalWrite(IOExpander::CS,HIGH);
 	return ret;
 }
-/*
-Arduino.h
 
-#define HIGH 0x1
-#define LOW  0x0
-
-#define INPUT 0x0
-#define OUTPUT 0x1
-#define INPUT_PULLUP 0x2
-*/

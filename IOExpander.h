@@ -12,7 +12,7 @@ public:
 	void begin();
 	void beginSPI();
 	void setDeviceAddress(uint8_t addr);
-	void setSPIAddress(uint8_t addr);
+
 	void digitalWrite(uint8_t pin,uint8_t value);
 	uint8_t digitalRead(uint8_t pin);
 	void spiWriteByte(uint8_t value);
@@ -22,11 +22,10 @@ public:
 	uint16_t readByte();
 	void pinMode(uint8_t pin,uint8_t mode);
 private:
-	uint8_t spiBuf[4];
+	//uint8_t spiBuf[4];
 	uint8_t device_addr;
 	uint16_t buf;
-	uint8_t spi_addr;
-	uint8_t CS;
+
 	uint8_t SCK;
 	uint8_t SI;
 	uint8_t SO;
