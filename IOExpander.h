@@ -5,7 +5,7 @@
 
 // iic io expander type
 #define __IOE_MCP23017__
-//__IOE_PCF8574__
+//define __IOE_PCF8574__
 
 class IOExpander {
 public:

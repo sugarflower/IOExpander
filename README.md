@@ -1,7 +1,11 @@
-IOExpander Library
+** Unique feature.
+  You can access SPI devices (such as SPI SRAM) via I / O Expander connected to arduino or gamebuino (MAKERbuino).
 
-se of this library is to enable digital input / output easily from gamebuino (Makerbuino). Using i2c I / O Expander.
+** Available I / O Expander
+-PCF 8574 N / PCF 8574 A
+-MCP23017
 
-goal
-Make use of software SPI via expander connected to gamebuino (Makerbuino).
-* I thought that it is not smart that ICSP terminals are out but lines appear in various directions. If speed is sacrificed but it is all possible using one module, do not you think it is clear?
+  In the future also MCP 23008.
+
+important point.
+  In PCF 8574, input from SPI device is not good. It may be possible depending on the circuit, but it is easier to use the MCP 23017 that can set the PIN mode.
