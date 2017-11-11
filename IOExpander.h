@@ -4,9 +4,8 @@
 #include <Wire.h>
 
 // iic io expander type
+#define __IOE_MCP23017__
 //__IOE_PCF8574__
-//__IOE_MPC23017__
-#define __IOE_PCF8574__
 
 class IOExpander {
 public:
@@ -16,17 +15,16 @@ public:
 	void setSPIAddress(uint8_t addr);
 	void digitalWrite(uint8_t pin,uint8_t value);
 	uint8_t digitalRead(uint8_t pin);
-	//void writeSPI(uint16_t addr,uint8_t value);
-	//uint8_t readSPI(uint16_t addr);
 	void spiWriteByte(uint8_t value);
 	uint8_t spiReadByte();
-	void writeByte(uint8_t data);
-	uint8_t readByte();
+
+	void writeByte(uint16_t data);
+	uint16_t readByte();
 	void pinMode(uint8_t pin,uint8_t mode);
 private:
 	uint8_t spiBuf[4];
 	uint8_t device_addr;
-	uint8_t buf;
+	uint16_t buf;
 	uint8_t spi_addr;
 	uint8_t CS;
 	uint8_t SCK;
