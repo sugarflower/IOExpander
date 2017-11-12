@@ -2,6 +2,7 @@
 
 void IOExpander::begin(){
 	Wire.begin();
+	IOExpander::spi_mode = false;
 }
 
 void IOExpander::setDeviceAddress(uint8_t addr){
@@ -22,6 +23,9 @@ uint8_t IOExpander::digitalRead(uint8_t pin){
 	return (readByte()>>pin) & 1;
 }
 
+
+
+
 #ifdef __IOE_PCF8574__
 uint16_t IOExpander::readByte(){
 	Wire.requestFrom(device_addr,1);
@@ -41,20 +45,23 @@ void IOExpander::pinMode(uint8_t pin, uint8_t mode){}
 #endif
 
 
+
+
 #ifdef __IOE_MCP23017__
 uint16_t IOExpander::readByte(){
 	IOExpander::buf = 0;
 
-	Wire.beginTransmission(device_addr);
-	Wire.write(0x13);
-	Wire.endTransmission();
-	Wire.requestFrom(device_addr,1);
-	while( Wire.available() ){
-		IOExpander::buf = Wire.read();
+	if( !IOExpander::spi_mode){
+		Wire.beginTransmission(device_addr);
+		Wire.write(0x13);
+		Wire.endTransmission();
+		Wire.requestFrom(device_addr,1);
+		while( Wire.available() ){
+			IOExpander::buf = Wire.read();
+		}
+		IOExpander::buf = IOExpander::buf << 8;
 	}
-
-	IOExpander::buf = IOExpander::buf << 8;
-
+	
 	Wire.beginTransmission(device_addr);
 	Wire.write(0x12);
 	Wire.endTransmission();
@@ -70,11 +77,12 @@ void IOExpander::writeByte(uint16_t data){
 	Wire.write(0x14);
 	Wire.write(data & 0xff);
 	Wire.endTransmission();	
-
-	Wire.beginTransmission(device_addr);
-	Wire.write(0x15);
-	Wire.write((data>>8) & 0xff);
-	Wire.endTransmission();	
+	if(!IOExpander::spi_mode){
+		Wire.beginTransmission(device_addr);
+		Wire.write(0x15);
+		Wire.write((data>>8) & 0xff);
+		Wire.endTransmission();
+	}
 }
 
 void IOExpander::pinMode(uint8_t pin, uint8_t mode){
@@ -141,9 +149,10 @@ void IOExpander::pinMode(uint8_t pin, uint8_t mode){
 }
 #endif
 
+/*
+ software spi via iic ( pretty slowly )
 
-
-
+*/
 void IOExpander::beginSPI(){
 	IOExpander::SCK=2;
 	IOExpander::SI =1;
@@ -151,22 +160,29 @@ void IOExpander::beginSPI(){
 	IOExpander::pinMode(IOExpander::SCK,OUTPUT);
 	IOExpander::pinMode(IOExpander::SI,OUTPUT);
 	IOExpander::pinMode(IOExpander::SO,INPUT);
+	IOExpander::digitalWrite(IOExpander::SCK,LOW);
 }
 
 void IOExpander::spiWriteByte(uint8_t value){
+	IOExpander::spi_mode = true;
 	for(int i=0; i<8; i++){
 		IOExpander::digitalWrite(IOExpander::SI,(value&(0x80>>i))!=0 ? HIGH : LOW );
 		IOExpander::digitalWrite(IOExpander::SCK,HIGH);
 		IOExpander::digitalWrite(IOExpander::SCK,LOW);
 	}
+	IOExpander::spi_mode = false;
 }
+
 uint8_t IOExpander::spiReadByte(){
+	IOExpander::spi_mode = true;
 	uint8_t ret=0;
 	for(int i=0; i<8; i++){
-		IOExpander::digitalWrite(IOExpander::SCK,LOW);
+		
 		ret |= IOExpander::digitalRead(IOExpander::SO)<<(7-i);
 		IOExpander::digitalWrite(IOExpander::SCK,HIGH);
+		IOExpander::digitalWrite(IOExpander::SCK,LOW);
 	}
+	IOExpander::spi_mode = false;
 	return ret;
 }
 

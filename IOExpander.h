@@ -5,7 +5,7 @@
 
 // iic io expander type
 #define __IOE_MCP23017__
-//define __IOE_PCF8574__
+//#define __IOE_PCF8574__
 
 class IOExpander {
 public:
@@ -22,13 +22,14 @@ public:
 	uint16_t readByte();
 	void pinMode(uint8_t pin,uint8_t mode);
 private:
-	//uint8_t spiBuf[4];
 	uint8_t device_addr;
 	uint16_t buf;
 
 	uint8_t SCK;
 	uint8_t SI;
 	uint8_t SO;
+
+	boolean spi_mode;
 };
 
 #endif
