@@ -39,7 +39,7 @@ void setup() {
 
 	ex.begin(); // IOExpander begin
 	ex.setDeviceAddress(0x20); //I2C IOExpander device address
-	ex.beginSPI(); // SPI via I2C begin
+	ex.beginSPI(2,1,0); // SPI via I2C begin
 	
 	ex.pinMode(3,OUTPUT); //CS
 	ex.digitalWrite(3,HIGH); //CS high
