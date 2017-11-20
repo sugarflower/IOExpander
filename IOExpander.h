@@ -10,7 +10,7 @@
 class IOExpander {
 public:
 	void begin();
-	void beginSPI();
+	void beginSPI(uint8_t sck,uint8_t si,uint8_t so);
 	void setDeviceAddress(uint8_t addr);
 
 	void digitalWrite(uint8_t pin,uint8_t value);

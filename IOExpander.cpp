@@ -2,6 +2,7 @@
 
 void IOExpander::begin(){
 	Wire.begin();
+	Wire.setClock(400000L);
 	IOExpander::spi_mode = false;
 }
 
@@ -153,10 +154,10 @@ void IOExpander::pinMode(uint8_t pin, uint8_t mode){
  software spi via iic ( pretty slowly )
 
 */
-void IOExpander::beginSPI(){
-	IOExpander::SCK=2;
-	IOExpander::SI =1;
-	IOExpander::SO =0;
+void IOExpander::beginSPI(uint8_t sck,uint8_t si,uint8_t so){
+	IOExpander::SCK= sck;
+	IOExpander::SI = si;
+	IOExpander::SO = so;
 	IOExpander::pinMode(IOExpander::SCK,OUTPUT);
 	IOExpander::pinMode(IOExpander::SI,OUTPUT);
 	IOExpander::pinMode(IOExpander::SO,INPUT);
